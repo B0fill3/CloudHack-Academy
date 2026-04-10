@@ -29,8 +29,8 @@ Para los laboratorios que despliegan infraestructura real en AWS (labs 3–9): u
 ## Arranque
 
 ```bash
-git clone "https://github.com/B0fill3/CloudHack Academy"
-cd "CloudHack Academy"
+git clone "https://github.com/B0fill3/CloudHack-Academy"
+cd CloudHack-Academy
 ./start.sh
 ```
 
