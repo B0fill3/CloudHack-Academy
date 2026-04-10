@@ -1,0 +1,232 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Laboratorio IAM – crea usuarios Student y Admin, políticas, un
+  bucket privado y una bucket‑policy que concede lectura a todos los usuarios de
+  la cuenta pero permite modificar objetos solo al usuario Admin.\n"
+
+Parameters:
+  AccountId:
+    Type: String
+    Default: '123456789012'
+    Description: ID de la cuenta AWS donde se despliega el lab
+
+Resources:
+  ## ────────────────────────────────────────────────────────── ##
+  ## Usuarios IAM                                              ##
+  ## ────────────────────────────────────────────────────────── ##
+  StudentUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: Lab-Student
+      Path: "/cloud-academy/students/"
+
+  AdminUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: Lab-Admin
+      Path: "/cloud-academy/admins/"
+
+  ## Opcional: crea AccessKey para el estudiante
+  StudentAccessKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: !Ref StudentUser
+      Status: Active
+    Metadata:
+      Explanation: Entrega esta AccessKey/Secret al alumno para la CLI
+
+  ## ────────────────────────────────────────────────────────── ##
+  ## Políticas gestionadas para cada usuario                   ##
+  ## ────────────────────────────────────────────────────────── ##
+  StudentPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: lab-student-read-only
+      Users:
+        - !Ref StudentUser
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          # Solo lectura en S3 y listar usuarios/roles
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:ListBucket
+            Resource:
+              - !Sub arn:aws:s3:::company-lab-bucket
+              - !Sub arn:aws:s3:::company-lab-bucket/*
+          
+          # Permisos para explorar IAM
+          - Effect: Allow
+            Action:
+              - iam:Get*
+              - iam:List*
+              - sts:AssumeRole
+              - lambda:ListFunctions
+              - lambda:GetPolicy
+            Resource: '*'
+
+  AdminPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: lab-admin-full
+      Users:
+        - !Ref AdminUser
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: '*'
+            Resource: '*'
+  
+  ## ────────────────────────────────────────────────────────── ##
+  ## Roles IAM                                             ##
+  ## ────────────────────────────────────────────────────────── ##
+  StudentAssumableRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: lab-student-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AccountId}:root
+            Action: sts:AssumeRole
+            Condition:
+              StringLike:
+                aws:PrincipalArn: !Sub "arn:aws:iam::${AccountId}:user/cloud-academy/*"
+      Path: /
+      Policies:
+        - PolicyName: lab-student-role-policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - s3:ListBucket
+                  - s3:GetObject
+                Resource:
+                  - !Sub arn:aws:s3:::${IAMenvironmentBucket}
+                  - !Sub arn:aws:s3:::${IAMenvironmentBucket}/*
+
+              - Effect: Allow
+                Action: s3:ListAllMyBuckets
+                Resource: "*"
+
+  ## ────────────────────────────────────────────────────────── ##
+  ## Grupo IAM                                                  ##
+  ## ────────────────────────────────────────────────────────── ##
+  LabIAMGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: Lab-IAM-Group
+      Path: "/cloud-academy/"
+  StudentAndAdminToGroup:
+    Type: AWS::IAM::UserToGroupAddition
+    Properties:
+      GroupName: !Ref LabIAMGroup
+      Users:
+        - !Ref StudentUser
+        - !Ref AdminUser
+
+
+  ## ────────────────────────────────────────────────────────── ##
+  ## Bucket S3                                                 ##
+  ## ────────────────────────────────────────────────────────── ##
+  IAMenvironmentBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub h4ckthecl0ud-${AWS::AccountId}-onlyroleaccess
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true 
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerPreferred
+
+  ## Bucket policy: lectura a toda la cuenta, escritura solo a Admin
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref IAMenvironmentBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          # 1️⃣ Permitir LIST & GET a todos los usuarios/roles de la cuenta
+          - Sid: AllowReadToAccount
+            Effect: Allow
+            Principal:
+              AWS: !GetAtt StudentAssumableRole.Arn
+            Action:
+              - s3:ListBucket
+              - s3:GetObject
+            Resource:
+              - !Sub arn:aws:s3:::${IAMenvironmentBucket}
+              - !Sub arn:aws:s3:::${IAMenvironmentBucket}/*
+
+          # 2️⃣ Permitir PUT & DELETE solo al usuario Admin
+          - Sid: AllowWriteToAdmin
+            Effect: Allow
+            Principal:
+              AWS: !GetAtt AdminUser.Arn
+            Action:
+              - s3:PutObject
+              - s3:DeleteObject
+            Resource: !Sub arn:aws:s3:::${IAMenvironmentBucket}/*
+
+
+  ## ────────────────────────────────────────────────────────── ##
+  ## Lambda IAM Role (necesario para que la función se ejecute) ##
+  ## ────────────────────────────────────────────────────────── ##
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: lab-basic-lambda-execution-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  ## ────────────────────────────────────────────────────────── ##
+  ## Función Lambda Vacía                                      ##
+  ## ────────────────────────────────────────────────────────── ##
+  StudentOnlyLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: Hello-world
+      Handler: index.handler
+      Runtime: python3.9
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        ZipFile: |
+          def handler(event, context):
+              return "Hello world"
+
+  ## ────────────────────────────────────────────────────────── ##
+  ## Lambda Resource Policy: acceso solo desde lab-admin      ##
+  ## ────────────────────────────────────────────────────────── ##
+  LambdaAccessPolicy:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref StudentOnlyLambda
+      Action: lambda:InvokeFunction
+      Principal: !Sub arn:aws:iam::${AccountId}:user/cloud-academy/admins/Lab-Admin
+
+Outputs:
+  StudentAccessKeyId:
+    Description: "AccessKeyId del usuario lab‑student"
+    Value: !Ref StudentAccessKey               # ←  devuelve el Key ID
+
+  StudentSecretAccessKey:
+    Description: "SecretAccessKey del usuario lab‑student"
+    Value: !GetAtt StudentAccessKey.SecretAccessKey
+
+
+  

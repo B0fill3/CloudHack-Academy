@@ -1,0 +1,83 @@
+logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+    text-decoration: none;
+}
+
+.logout-link {
+    color: #ff6600; /* Orange */
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.logout-link:hover {
+    color: #ff8533; /* Lighter orange on hover */
+}
+
+main {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    min-height: calc(100vh - 160px); /* Ensures footer stays at bottom */
+}
+
+.account-container {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.account-title {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+    text-align: center;
+}
+
+.account-info {
+    margin-bottom: 2rem;
+}
+
+.info-item {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.info-label {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: #666;
+}
+
+.info-value {
+    font-size: 1.1rem;
+    color: #333;
+    padding: 0.5rem;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    border-left: 3px solid #ff6600; /* Orange accent */
+}
+
+.back-to-store {
+    display: block;
+    text-align: center;
+    margin-top: 2rem;
+    color: #ff6600; /* Orange link */
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.back-to-store:hover {
+    text-decoration: underline;
+}

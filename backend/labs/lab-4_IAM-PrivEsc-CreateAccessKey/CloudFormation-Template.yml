@@ -1,0 +1,120 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: |
+  Laboratorio de escalada de privilegios usando iam:CreateAccessKey.
+
+Parameters:
+  AccountId:
+    Type: String
+    Default: '123456789012'
+    Description: ID de la cuenta AWS donde se despliega el lab
+
+Resources:
+  ## Grupo de desarrolladores
+  DevsGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: devs
+
+  ## Usuarios IAM
+  DavidUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: david
+
+  AdminUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: store-admin
+
+  ## Añade ambos usuarios al grupo devs
+  AddUsersToDevs:
+    Type: AWS::IAM::UserToGroupAddition
+    Properties:
+      GroupName: !Ref DevsGroup
+      Users:
+        - !Ref DavidUser
+        - !Ref AdminUser
+
+  ## Access Key para david
+  DavidAccessKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: !Ref DavidUser
+      Status: Active
+
+  ## Política para que ambos vean a qué grupo pertenecen y sus políticas
+  ViewGroupPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ViewGroupAndPolicies
+      Users:
+        - !Ref DavidUser
+        - !Ref AdminUser
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - iam:ListGroupsForUser
+              - iam:GetGroup
+              - iam:ListAttachedGroupPolicies
+              - iam:GetGroupPolicy
+              - iam:ListGroupPolicies
+            Resource: '*'
+
+  ## Política de grupo: permitir a cada miembro crear AccessKey sobre sí mismo
+  CreateOwnAccessKeyPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: DevsCreateOwnAccessKey
+      Groups:
+        - !Ref DevsGroup
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: iam:CreateAccessKey
+            Resource: '*'
+  ## Bucket S3 para Admin
+  StoreFilesBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub storefiles-${AWS::AccountId}-privilegeescalationlab
+      Tags:
+        - Key: cloud-hacking-labs
+          Value: IAM-Privilege-Scalation-Lab-AccessKey
+
+  ## Política inline para Admin: acceso total a su bucket y ver solo ese bucket
+  AdminS3LimitedAccess:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: AdminS3LimitedAccess
+      Users:
+        - !Ref AdminUser
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          # Permitir acceso completo al bucket específico
+          - Effect: Allow
+            Action: s3:*
+            Resource:
+              - !Sub arn:aws:s3:::storefiles-${AWS::AccountId}-privilegeescalationlab
+              - !Sub arn:aws:s3:::storefiles-${AWS::AccountId}-privilegeescalationlab/*
+
+          # Permitir listar todos los buckets (necesario para `aws s3 ls`)
+          - Effect: Allow
+            Action: s3:ListAllMyBuckets
+            Resource: '*'
+
+Outputs:
+  DavidAccessKeyId:
+    Description: Access Key ID para david
+    Value: !Ref DavidAccessKey
+
+  DavidSecretAccessKey:
+    Description: Secret Access Key para david
+    Value: !GetAtt DavidAccessKey.SecretAccessKey
+
+  StoreFilesBucketName:
+    Description: Nombre del bucket S3
+    Value: !Ref StoreFilesBucket

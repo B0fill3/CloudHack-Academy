@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/product.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="product-container">
+    <!-- Columna 1: Imágenes -->
+    <div class="product-image-container">
+        <div class="product-image">
+            <!-- Usa la imagen de la BD si existe, o un placeholder si no -->
+            <img src="{{sneaker.image_url}}" alt="{{ sneaker.name }}">
+        </div>
+    </div>
+
+    <!-- Columna 2: Detalles del Producto -->
+    <div class="product-details">
+        <h1>{{ sneaker.name }}</h1>
+
+        <!-- Ejemplo: rating ficticio o calculado -->
+        <div class="rating">
+            <div class="stars">
+                <span class="star">★</span>
+                <span class="star">★</span>
+                <span class="star">★</span>
+                <span class="star">★</span>
+                <span class="star" style="color: #ddd;">★</span>
+            </div>
+            <span class="reviews-count">(42 reviews)</span>
+        </div>
+
+        <div class="product-price">${{ sneaker.price }}</div>
+
+        <div class="product-description">
+            <p>{{ sneaker.description }}</p>
+        </div>
+        <form method="POST" action="/add_to_cart/{{ sneaker.id }}">
+            <button class="add-to-cart">Add to Cart</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

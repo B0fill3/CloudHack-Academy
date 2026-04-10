@@ -1,0 +1,1 @@
+Servicio de autenticación y autorización que gestiona usuarios y controla el acceso a aplicaciones. La exposición de identificadores de cliente o una configuración incorrecta en los atributos y roles asignados puede permitir el registro malicioso, la elevación de privilegios o el acceso a rutas restringidas.

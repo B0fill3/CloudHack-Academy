@@ -1,0 +1,18 @@
+# Node.js
+frontend/node_modules/
+frontend/.next/
+frontend/.env
+
+# Python
+backend/venv/
+backend/__pycache__/
+backend/*.pyc
+backend/.env
+
+# Mac / Linux / Windows genéricos
+.DS_Store
+*.swp
+
+.vscode
+.claude 
+

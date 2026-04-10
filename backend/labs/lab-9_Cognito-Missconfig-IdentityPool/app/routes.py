@@ -1,0 +1,261 @@
+from flask import render_template, redirect, url_for, request, flash, abort, session
+from app import app, db
+from flask_login import login_user, logout_user, login_required, current_user
+from app.models import Sneaker, Cart, Order, OrderItem, CognitoUser, User
+import boto3
+import json
+import jwt
+
+
+@app.route('/')
+def index():
+    sneakers = Sneaker.query.all()
+    return render_template('index.html', sneakers=sneakers)
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    # Leer configuración de Cognito desde archivo JSON
+    with open("app/static/cognito-auth.json") as f:
+        cognito_config = json.load(f)
+
+    COGNITO_USER_POOL_ID = cognito_config["UserPoolId"]
+    COGNITO_CLIENT_ID = cognito_config["UserPoolClientId"]
+    COGNITO_REGION = COGNITO_USER_POOL_ID.split("_")[0]  # Extrae la región del UserPoolId
+    # Inicializa el cliente de Cognito
+    client = boto3.client('cognito-idp', region_name=COGNITO_REGION)
+
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        try:
+            response = client.initiate_auth(
+                AuthFlow='USER_PASSWORD_AUTH',
+                AuthParameters={
+                    'USERNAME': email,
+                    'PASSWORD': password
+                },
+                ClientId=COGNITO_CLIENT_ID
+            )
+            id_token = response['AuthenticationResult']['IdToken']
+        
+            # Decodificar token (sin validación por simplicidad en el lab)
+            decoded = jwt.decode(id_token, options={"verify_signature": False})
+            user = CognitoUser(email=email, id_token=id_token)
+
+            # Guardar datos mínimos del usuario en la sesión
+            session['user_email'] = email
+            session['id_token'] = id_token
+
+            login_user(user)  # login con flask_login
+            return redirect(url_for('index'))
+        except client.exceptions.NotAuthorizedException:
+            return "Incorrect login", 401
+        except client.exceptions.UserNotFoundException:
+            return "User not found", 404
+        except client.exceptions.InvalidParameterException:
+            return "Invalid parameter", 400
+        except Exception as e:
+            return f"Unexpected error: {str(e)}", 500
+    return render_template('login.html')
+
+@app.route('/sneaker/<int:sneaker_id>')
+def sneaker(sneaker_id):
+    sneaker = Sneaker.query.get(sneaker_id)
+    return render_template('product_detail.html', sneaker=sneaker)
+
+
+@app.route('/add_to_cart/<int:sneaker_id>', methods=['POST'])
+@login_required
+def add_to_cart(sneaker_id):
+    # 1. Buscar la zapatilla en la BD
+    sneaker = Sneaker.query.get(sneaker_id)
+    if not sneaker:
+        abort(404, description="Sneaker not found")
+
+    # 2. Comprobar si ya existe en el carrito del usuario
+    cart_item = Cart.query.filter_by(user_email=current_user.id, sneaker_id=sneaker.id).first()
+
+    # 3. Si existe, incrementa la cantidad. Si no, crea un nuevo registro.
+    if cart_item:
+        cart_item.quantity += 1
+    else:
+        cart_item = Cart(user_email=current_user.id, sneaker_id=sneaker.id, quantity=1)
+        db.session.add(cart_item)
+
+    # 4. Guardar cambios en la BD
+    db.session.commit()
+    
+    # 5. (Opcional) Mensaje de confirmación o redirección
+    flash("Sneaker added to your cart!", "success")
+    return redirect(url_for('cart'))
+
+@app.route('/remove_one/<int:sneaker_id>', methods=['POST'])
+@login_required
+def remove_one(sneaker_id):
+    """
+    Elimina UNA unidad de un producto en el carrito.
+    Si la cantidad llega a 0, elimina por completo el registro del carrito.
+    """
+    sneaker = Sneaker.query.get(sneaker_id)
+    if not sneaker:
+        abort(404, description="Sneaker not found")
+
+    cart_item = Cart.query.filter_by(user_email=current_user.id, sneaker_id=sneaker.id).first()
+    if not cart_item:
+        # No hay nada que eliminar
+        flash("Item is not in your cart.", "warning")
+        return redirect(url_for('cart'))
+
+    # Decrementar en 1
+    cart_item.quantity -= 1
+
+    # Si la cantidad llega a 0, se borra el registro
+    if cart_item.quantity <= 0:
+        db.session.delete(cart_item)
+
+    db.session.commit()
+    flash("One unit removed from your cart.", "success")
+    return redirect(url_for('cart'))
+
+
+@app.route('/remove_all/<int:sneaker_id>', methods=['POST'])
+@login_required
+def remove_all(sneaker_id):
+    """
+    Elimina TODAS las unidades de un producto del carrito.
+    """
+    sneaker = Sneaker.query.get(sneaker_id)
+    if not sneaker:
+        abort(404, description="Sneaker not found")
+
+    cart_item = Cart.query.filter_by(user_email=current_user.id, sneaker_id=sneaker.id).first()
+    if not cart_item:
+        flash("Item is not in your cart.", "warning")
+        return redirect(url_for('cart'))
+
+    # Eliminar el registro completo
+    db.session.delete(cart_item)
+    db.session.commit()
+    flash("All units of this product have been removed from your cart.", "success")
+    return redirect(url_for('cart'))
+
+
+@app.route('/account')
+@login_required
+def account():
+    return render_template('account.html', user=current_user)
+
+@app.route('/cart')
+@login_required
+def cart():
+    # Obtener todos los ítems de carrito del usuario actual
+    cart_items = (db.session.query(Cart)
+                  .join(Sneaker, Cart.sneaker_id == Sneaker.id)
+                  .filter(Cart.user_email == current_user.id)
+                  .all())
+    
+    # Cálculo ejemplo en Python (podrías hacerlo en la plantilla también)
+    sub_total = 0
+    for item in cart_items:
+        sub_total += item.sneaker.price * item.quantity
+        
+    total = sub_total 
+
+    return render_template('cart.html',
+                           cart_items=cart_items,
+                           total=total)
+
+
+
+
+@app.route("/add_order", methods=["POST"])
+@login_required
+def add_order():
+    """ Crea un nuevo pedido a partir del carrito del usuario y lo guarda en la base de datos """
+    
+    # 1️⃣ Obtener el carrito del usuario
+    cart_items = Cart.query.filter_by(user_email=current_user.id).all()
+
+    if not cart_items:
+        flash("Your cart is empty. Add items before placing an order.", "warning")
+        return redirect(url_for("cart"))  # Redirige al carrito si está vacío
+
+    # 2️⃣ Calcular el total del pedido
+    total_price = sum(item.sneaker.price * item.quantity for item in cart_items)
+
+    # 3️⃣ Crear un nuevo pedido
+    new_order = Order(total=total_price, user_email=current_user.id)
+    db.session.add(new_order)
+    db.session.commit()  # Se guarda el pedido para obtener su ID
+
+    # 4️⃣ Añadir los productos del carrito al pedido
+    for item in cart_items:
+        order_item = OrderItem(order_id=new_order.id, sneaker_id=item.sneaker.id, quantity=item.quantity)
+        db.session.add(order_item)
+
+    # 5️⃣ Vaciar el carrito después de generar el pedido
+    Cart.query.filter_by(user_email=current_user.id).delete()
+
+    # 6️⃣ Guardar cambios en la base de datos
+    db.session.commit()
+
+    # 7️⃣ Redirigir a la página de confirmación del pedido
+    flash("Order placed successfully!", "success")
+    return redirect(url_for("order_confirmation", order_id=new_order.id))
+
+
+@app.route("/order_confirmation/<int:order_id>")
+@login_required
+def order_confirmation(order_id):
+    order = Order.query.get(order_id)
+    
+    if not order:
+        abort(404, description="Order not found")
+
+    return render_template("order-confirmation.html", order=order)
+
+
+
+@app.route('/logout')
+def logout():
+    # Lógica de logout
+    logout_user()
+    return redirect(url_for('index'))
+
+@app.route('/admin')
+@login_required
+def admin_panel():
+    if current_user.id != 'admin@shoplab.com':
+        abort(403)  # Acceso prohibido para usuarios no admin
+
+    users = User.query.filter_by(admin=False).all()
+    return render_template('admin_panel.html', users=users)
+
+
+@app.route('/delete_user/<int:user_id>', methods=['POST'])
+@login_required
+def delete_user(user_id):
+    if not current_user.id == 'admin@shoplab.com':
+        abort(403)
+    user_to_delete = User.query.get_or_404(user_id)
+    
+    # Evita que el admin se borre a sí mismo
+    if user_to_delete.id == current_user.id:
+        flash("You cannot delete yourself!", "danger")
+        return redirect(url_for('admin_panel'))
+
+    if user_to_delete.username == "steve":
+        session['lab_solved'] = True
+
+    db.session.delete(user_to_delete)
+    db.session.commit()
+    flash("User deleted successfully.", "success")
+    return redirect(url_for('admin_panel'))
+
+@app.route('/clear_lab_solved', methods=['POST'])
+def clear_lab_solved():
+    session.pop('lab_solved', None)
+    return '', 204
+
+
+

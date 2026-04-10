@@ -1,0 +1,20 @@
+{
+  "id": 5,
+  "topic": "IAM",
+  "credentialsNeeded": true,
+  "title": "Escalada de Privilegios a través de una nueva versión de una política",
+  "description": "En alguna parte de este laboratorio podrás encontrar unas credenciales de acceso a AWS que un desarrollador ha olvidado borrar. Escala tus privilegios a través de estas credenciales y elimina la cuenta de Steve.",
+  "difficulty": "intermediate",
+  "recommendedReadings": [
+    "Introduction",
+    "1_Fundamentos de IAM",
+    "2_Entidades de IAM",
+    "3_Políticas de IAM",
+    "5_Enumeración de Permisos",
+    "6_Escalada de Privilegios"
+  ],
+  "hints": [
+    "Can you inject something into a field used for invoice generation?"
+  ],
+  "note": "Este laboratorio puede tardar un tiempo extra en desplegarse, ya que tiene que crear todos los recursos necesarios en AWS. En este laboratorio no deberías intentar acceder a ningún servicio de AWS a tráves de tu cuenta de usuario. En su lugar, deberías buscar credenciales de acceso a AWS que un desarrollador ha olvidado borrar. Estas credenciales pueden estar en cualquier parte del laboratorio, así que asegúrate de revisar todos los archivos y configuraciones disponibles. Una vez encuentres las credenciales, podrás utilizarlas para escalar tus privilegios y eliminar la cuenta de Steve."
+}

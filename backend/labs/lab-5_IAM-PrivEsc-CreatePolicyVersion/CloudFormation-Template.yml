@@ -1,0 +1,138 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: |
+  Laboratorio de escalada de privilegios usando iam:CreatePolicyVersion.
+
+Parameters:
+  AccountId:
+    Type: String
+    Default: '123456789012'
+    Description: ID de la cuenta AWS donde se despliega el lab
+
+Resources:
+  ## ────────────────────────────────────────────────────────── ##
+  ## Grupo de desarrolladores                                ##
+  ## ────────────────────────────────────────────────────────── ##
+  DevsGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: devs
+
+  ## ────────────────────────────────────────────────────────── ##
+  ## Usuario IAM “david”                                     ##
+  ## ────────────────────────────────────────────────────────── ##
+  DavidUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: david
+
+  ## Access Key para david
+  DavidAccessKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: !Ref DavidUser
+      Status: Active
+
+  ## ────────────────────────────────────────────────────────── ##
+  ## Asociar “david” al grupo “devs”                          ##
+  ## ────────────────────────────────────────────────────────── ##
+  AddDavidToDevs:
+    Type: AWS::IAM::UserToGroupAddition
+    Properties:
+      GroupName: !Ref DevsGroup
+      Users:
+        - !Ref DavidUser
+
+  ## ────────────────────────────────────────────────────────── ##
+  ## Política restrictiva inicial para “david”               ##
+  ## ────────────────────────────────────────────────────────── ##
+  DavidRestrictedPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: david-restrictive
+      Description: "Lectura S3 y visibilidad de nombres y contenido de políticas"
+      Users:
+        - !Ref DavidUser
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          # Listado de nombres de políticas (usuario y grupo)
+          - Effect: Allow
+            Action:
+              - iam:ListAttachedUserPolicies
+              - iam:ListUserPolicies
+              - iam:ListAttachedGroupPolicies
+              - iam:GetGroupPolicy
+              - iam:ListGroupPolicies
+            Resource:
+              - !Sub arn:aws:iam::${AWS::AccountId}:user/${DavidUser}
+              - !Sub arn:aws:iam::${AWS::AccountId}:group/devs
+
+          # Comprobar a qué grupos pertenece el usuario
+          - Effect: Allow
+            Action:
+              - iam:ListGroupsForUser
+            Resource:
+              - !Sub arn:aws:iam::${AWS::AccountId}:user/${DavidUser}
+
+          # Obtener el contenido de políticas inline del usuario
+          - Effect: Allow
+            Action:
+              - iam:GetUserPolicy
+            Resource:
+              - !Sub arn:aws:iam::${AWS::AccountId}:user/${DavidUser}
+
+          # Obtener versión y documento de políticas gestionadas del usuario o del grupo
+          - Effect: Allow
+            Action:
+              - iam:GetPolicy
+              - iam:GetPolicyVersion
+            Resource:
+              - "*"
+
+  ## ────────────────────────────────────────────────────────── ##
+  ## Permisos de escalada en el grupo “devs”                 ##
+  ## (crear y activar nuevas versiones de la política)       ##
+  ## ────────────────────────────────────────────────────────── ##
+  DevsPolicyAllowPolicyVersioning:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: DevsAllowPolicyVersioning
+      Groups:
+        - !Ref DevsGroup
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowCreatePolicyVersion
+            Effect: Allow
+            Action: iam:CreatePolicyVersion
+            Resource: "*"
+          - Sid: AllowSetDefaultPolicyVersion
+            Effect: Allow
+            Action: iam:SetDefaultPolicyVersion
+            Resource: "*"
+
+  ## ────────────────────────────────────────────────────────── ##
+  ## Bucket S3 de soporte del laboratorio                    ##
+  ## ────────────────────────────────────────────────────────── ##
+  StoreFilesBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub storefiles-${AWS::AccountId}-policyversionlab
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        RestrictPublicBuckets: true
+
+Outputs:
+  DavidAccessKeyId:
+    Description: Access Key ID para david
+    Value: !Ref DavidAccessKey
+
+  DavidSecretAccessKey:
+    Description: Secret Access Key para david
+    Value: !GetAtt DavidAccessKey.SecretAccessKey
+
+  StoreFilesBucketName:
+    Description: Nombre del bucket S3 de soporte
+    Value: !Ref StoreFilesBucket

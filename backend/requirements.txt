@@ -1,0 +1,4 @@
+flask
+docker
+boto3
+flask_cors

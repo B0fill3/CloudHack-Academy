@@ -1,0 +1,28 @@
+<!-- index.html -->
+{% extends "base.html" %}
+
+{% block styles %}
+  <link rel = "stylesheet" type = "text/css" href = "{{ url_for('static', filename='styles/index.css') }}">
+{% endblock %}
+
+{% block content %}
+<h1>Featured Sneakers</h1>
+<div class="sneaker-grid">
+    {% for sneaker in sneakers %}
+    <div class="sneaker-card">
+        <!-- Ajusta la ruta según donde guardes tus imágenes -->
+         <a href="/sneaker/{{sneaker.id}}"> 
+        <img 
+          src="{{ sneaker.image }}"
+          alt="{{ sneaker.name }}"
+          class="sneaker-image"
+        >
+        <div class="sneaker-info">
+            <div class="sneaker-name">{{ sneaker.name }}</div>
+            <div class="sneaker-price">${{ sneaker.price }}</div>
+        </div>
+        </a>  
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

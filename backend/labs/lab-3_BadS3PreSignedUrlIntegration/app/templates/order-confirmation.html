@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/order-confirmation.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div class="confirmation-container">
+        <div class="confirmation-header">
+            <div class="confirmation-icon">✓</div>
+            <h1 class="confirmation-title">Order Confirmed!</h1>
+            <p class="confirmation-message">
+                Thank you for your purchase. Your order has been received.
+            </p>
+        </div>
+
+        <div class="order-details">
+            <div class="detail-group">
+                <h3>Order Number</h3>
+                <div class="detail-value order-number">#{{ order.id }}</div>
+            </div>
+        </div>
+
+        <h2 class="items-title">Order Summary</h2>
+        <div class="order-items">
+            {% for item in order.sneakers %}
+            <div class="order-item">
+                <div class="item-image">
+                    <img src="{{sneaker.image_url }}" alt="{{ item.sneaker.name }}">
+                </div>
+                <div class="item-details">
+                    <h4>{{ item.sneaker.name }}</h4>
+                    <div class="item-quantity">Quantity: {{ item.quantity }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="order-summary">
+            <div class="summary-row total">
+                <span>Total</span>
+                <span>${{ order.total }}</span>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <a class="continue-shopping"href="/">
+                Continue Shopping
+            </a>
+        </div>
+    </div>
+{% endblock %}

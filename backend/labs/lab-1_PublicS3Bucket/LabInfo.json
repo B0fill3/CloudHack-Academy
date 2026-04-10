@@ -1,0 +1,16 @@
+{
+  "id": 1,
+  "topic": "S3 Buckets",
+  "credentialsNeeded": false,
+  "title": "Bucket de S3 expuesto",
+  "description": "En este laboratorio explorarás los riesgos de seguridad asociados a buckets de Amazon S3 expuestos públicamente. El bucket objetivo ha sido configurado incorrectamente, permitiendo accesos no autorizados. Tu objetivo es explotar esta mala configuración para obtener acceso a la cuenta de administrador y eliminar la cuenta de Steve. Este ejercicio demuestra los peligros derivados de permisos inseguros en S3.",
+  "difficulty": "begginer",
+  "recommendedReadings": ["Introducción", "1_Permisos en S3", "2_Comandos CLI"],
+  "hints": [
+    "¿Dónde están almacenadas las imágenes de las zapatillas?",
+    "¿Puedes listar el contenido del bucket? Asegúrate de usar la región correcta.",
+    "¿Puedes intentar descargar el archivo de credenciales?",
+    "¿Puedes utilizar esas credenciales para acceder a la cuenta de administrador?",
+    "¿Puedes eliminar la cuenta de Steve?"
+  ]
+}

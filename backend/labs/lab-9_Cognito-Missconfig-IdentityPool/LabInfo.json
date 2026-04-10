@@ -1,0 +1,13 @@
+{
+  "id": 9,
+  "topic": "Amazon Cognito",
+  "credentialsNeeded": true,
+  "title": "Identity Pool Mal Configurado en Amazon Cognito",
+  "description": "Este laboratorio hace uso del servicio de Amazon Cognito, pero con un Identity Pool configurado de manera insegura. Escala tus privilegios usando estos datos y elimina la cuenta de Steve.",
+  "difficulty": "advanced",
+  "recommendedReadings": ["Introducción", "3_Identity Pools", "4_Malas prácticas con Identity Pools"],
+  "hints": [
+    "Can you inject something into a field used for invoice generation?"
+  ],
+  "note": "Este laboratorio puede tardar un tiempo extra en desplegarse, ya que tiene que crear todos los recursos necesarios en AWS. En este laboratorio no deberías intentar acceder a ningún servicio de AWS a tráves de tu cuenta de usuario. En su lugar, deberías buscar credenciales de acceso a AWS que un desarrollador ha olvidado borrar. Estas credenciales pueden estar en cualquier parte del laboratorio, así que asegúrate de revisar todos los archivos y configuraciones disponibles. Una vez que encuentres las credenciales, podrás utilizarlas para escalar tus privilegios y eliminar la cuenta de Steve."
+}

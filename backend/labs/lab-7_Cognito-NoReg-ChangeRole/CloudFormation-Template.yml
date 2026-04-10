@@ -1,0 +1,112 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: User Pool para laboratorio vulnerable con registro desde CLI
+
+Resources:
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        # Permisos para administrar Cognito (incluye AdminUpdateUserAttributes)
+        - arn:aws:iam::aws:policy/AmazonCognitoPowerUser
+        # Permisos básicos para Lambda (CloudWatch Logs)
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  CognitoPostConfirmationLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: SetDefaultRoleLambda
+      Handler: index.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python3.12
+      Timeout: 10
+      Code:
+        ZipFile: |
+          import boto3
+          import logging
+
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+
+          def lambda_handler(event, context):
+              logger.info(f"PostConfirmation triggered for {event['userName']}")
+              try:
+                  client = boto3.client('cognito-idp')
+                  client.admin_update_user_attributes(
+                      UserPoolId=event['userPoolId'],
+                      Username=event['userName'],
+                      UserAttributes=[{'Name': 'custom:role', 'Value': 'user'}]
+                  )
+              except Exception as e:
+                  logger.error(f"Error in PostConfirmation: {str(e)}", exc_info=True)
+                  # NO raise → no queremos romper confirmación aunque falle
+              return event  # SIEMPRE devolver el evento
+
+
+  LambdaInvokePermissionForCognito:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt CognitoPostConfirmationLambda.Arn
+      Action: lambda:InvokeFunction
+      Principal: cognito-idp.amazonaws.com
+      SourceArn: !Sub arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${CognitoUserPool}
+
+
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: LabUserPool
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+      VerificationMessageTemplate:
+        EmailSubject: "Verify your account on Lab"
+        EmailMessage: "Your verification code is {####}"
+        DefaultEmailOption: CONFIRM_WITH_CODE
+      Schema:
+        - Name: email
+          Required: true
+          Mutable: true
+        - Name: role
+          AttributeDataType: String
+          Mutable: true
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 6
+          RequireUppercase: false
+          RequireLowercase: false
+          RequireNumbers: false
+          RequireSymbols: false
+      LambdaConfig:
+        PostConfirmation: !GetAtt CognitoPostConfirmationLambda.Arn
+
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: LabWebClient
+      UserPoolId: !Ref CognitoUserPool
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_SRP_AUTH
+      AllowedOAuthFlowsUserPoolClient: false
+
+Outputs:
+  UserPoolId:
+    Description: ID del User Pool
+    Value: !Ref CognitoUserPool
+
+  UserPoolClientId:
+    Description: Client ID del User Pool Client (expuesto en el frontend)
+    Value: !Ref CognitoUserPoolClient

@@ -1,0 +1,5 @@
+Flask
+Flask-SQLAlchemy==3.0.2
+Flask-Login
+boto3
+Werkzeug

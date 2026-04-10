@@ -1,0 +1,24 @@
+services:
+
+  frontend:
+    build: ./frontend
+    container_name: cloudhack-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    container_name: cloudhack-backend
+    ports:
+      - "5005:5005"
+    volumes:
+      # Monta el backend en el mismo path absoluto del host para que los labs
+      # puedan ser encontrados por el daemon de Docker al lanzar sub-contenedores
+      - ${BACKEND_PATH}:${BACKEND_PATH}
+      # Socket del daemon de Docker del host (necesario para gestionar labs)
+      - /var/run/docker.sock:/var/run/docker.sock
+    working_dir: ${BACKEND_PATH}
+    restart: unless-stopped

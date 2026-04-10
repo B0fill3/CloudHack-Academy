@@ -1,0 +1,202 @@
+/* obsidian-markdown.css */
+.markdown-body {
+    background-color: #e4e4e400; /* Fondo oscuro */
+    color: #181818; /* Texto claro */
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    padding: 2rem;
+    border-radius: 12px;
+    line-height: 1.75;
+    font-size: 1rem;
+  }
+  
+  /* Encabezados con mayor tamaño y estilo moderno */
+  .markdown-body h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.75em;
+
+    border-bottom: 2px solid #44475a;
+    padding-bottom: 0.3em;
+  }
+  
+  .markdown-body h2 {
+    font-size: 2rem;
+    margin-top: 1.5em;
+    margin-bottom: 0.75em;
+
+    border-bottom: 1.5px solid #44475a;
+    padding-bottom: 0.3em;
+  }
+  
+  .markdown-body h3 {
+    font-size: 1.75rem;
+    margin-top: 1.2em;
+    margin-bottom: 0.6em;
+
+  }
+  
+  .markdown-body h4 {
+    font-size: 1.5rem;
+    margin-top: 1.2em;
+    margin-bottom: 0.5em;
+
+  }
+  
+  .markdown-body h5 {
+    font-size: 1.25rem;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+
+  }
+  
+  .markdown-body h6 {
+    font-size: 1.125rem;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+
+  }
+  
+  /* Enlaces con transición para un efecto moderno */
+  .markdown-body a {
+    color: #9d00ff;
+    text-decoration: underline;
+    transition: color 0.2s;
+  }
+  
+  .markdown-body a:hover {
+    color: #d940ff;
+  }
+  
+  /* Párrafos */
+  .markdown-body p {
+    margin-bottom: 1.25em;
+  }
+  
+  /* Código inline */
+  .markdown-body code {
+    background-color: #383638;
+    color: #f8f8f2;
+    padding: 0.3em 0.5em;
+    border-radius: 4px;
+    font-size: 0.95em;
+  }
+  
+  /* Bloques de código */
+  .markdown-body pre {
+    background-color: rgb(47,47,47);
+    padding: 1px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin-bottom: 1.25em;
+    font-size: 0.95em;
+  }
+  
+  .markdown-body pre code {
+    display: inline;
+    padding: 0;
+    margin: 0;
+  }
+  
+
+  /* Citas */
+  .markdown-body blockquote {
+    border-left: 4px solid #bd93f9;
+    padding-left: 1em;
+   
+    margin: 1.5em 0;
+  }
+  
+  /* Listas */
+  .markdown-body ul,
+  .markdown-body ol {
+    margin-left: 1.75em;
+    margin-bottom: 1.25em;
+  }
+  
+  .markdown-body li {
+    margin-bottom: 0.5em;
+  }
+  
+  /* Separadores */
+  .markdown-body hr {
+    border: 0;
+    height: 1px;
+    background-color: #44475a;
+    margin: 2em 0;
+  }
+  
+  /* Tablas */
+  .markdown-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.25em;
+  }
+  
+  .markdown-body table th,
+  .markdown-body table td {
+    border: 1px solid #44475a;
+    padding: 0.75em;
+    text-align: left;
+  }
+  
+  .markdown-body table th {
+    background-color: #44475a;
+  }
+  
+  /* Imágenes */
+  .markdown-body img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin: 2em auto;
+    display: block;
+  }
+  
+
+
+
+  /* Tablas */
+.markdown-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5em;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.markdown-body table th,
+.markdown-body table td {
+  padding: 0.85em 1em;
+  text-align: left;
+  border: 1px solid #dcdcdc;
+}
+
+.markdown-body table th {
+  background-color: #f4f4f5;
+  color: #181818;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.markdown-body table td {
+  background-color: #ffffff;
+  font-size: 0.95rem;
+  color: #181818;
+}
+
+.markdown-body table tr:nth-child(even) td {
+  background-color: #f9f9fa;
+}
+
+.markdown-body table tr:hover td {
+  background-color: #f0f0f0;
+}
+
+.markdown-body ul {
+  list-style-type: disc;
+  padding-left: 1.5em;
+}
+
+.markdown-body ol {
+  list-style-type: decimal;
+  padding-left: 1.5em;
+}

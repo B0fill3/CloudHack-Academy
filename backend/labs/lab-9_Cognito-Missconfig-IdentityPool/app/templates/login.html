@@ -1,0 +1,43 @@
+<!-- index.html -->
+{% extends "base.html" %} {% block styles %}
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{{ url_for('static', filename='styles/login.css') }}"
+/>
+{% endblock %} {% block content %}
+<div class="login-container">
+  <h1 class="login-title">Log in to your account</h1>
+  <p class="login-description" style="color: #555; font-size: 1.05rem; margin-bottom: 20px; text-align: center; background: #f5f7fa; padding: 12px 18px; border-radius: 6px;">
+    Please enter your corporate email from @shoplab.com and password to access your account.
+  </p>
+  <form method="POST" action="/login">
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input
+        name="email"
+        type="email"
+        id="email"
+        placeholder="you@shoplab.com"
+        required
+      />
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input name="password" type="password" id="password" required />
+    </div>
+    <button type="submit" class="login-button">Login</button>
+  </form>
+  <a href="/" class="back-to-store">Back to store</a>
+</div>
+<script>
+  // TODO: quitar esto antes de subir a producción
+  fetch("/static/cognito-auth.json")
+    .then((r) => r.json())
+    .then((cfg) => {
+      console.debug("[dev] Loaded Cognito config:", cfg);
+      // window.__Cognito = cfg; 
+    })
+    .catch((e) => console.warn("Error loading dev config", e));
+</script>
+{% endblock %}

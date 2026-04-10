@@ -1,0 +1,1 @@
+Los buckets de S3 almacenan datos en la nube, pero a menudo están mal configurados, lo que expone información sensible. Los atacantes aprovechan el acceso público, los permisos débiles y las credenciales filtradas para exfiltrar o manipular datos.

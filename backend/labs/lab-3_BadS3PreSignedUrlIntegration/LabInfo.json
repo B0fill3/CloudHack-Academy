@@ -1,0 +1,18 @@
+{
+  "id": 3,
+  "topic": "S3 Buckets",
+  "credentialsNeeded": true,
+  "title": "Bucket de S3 con integración incorrecta de URLs prefirmadas",
+  "description": "Este laboratorio contiene una vulnerabilidad de generación de URL prefirmadas. El objetivo es obtener las credenciales de la cuenta de administrador y eliminar la cuenta de Steve. La vulnerabilidad se encuentra en la forma en que se generan las URL prefirmadas para acceder a los archivos en el bucket S3. Al explotar esta vulnerabilidad, podrás acceder a archivos sensibles y obtener las credenciales necesarias para eliminar la cuenta de Steve.",
+  "difficulty": "intermediate",
+  "recommendedReadings": ["3_Presigned URLs"],
+  "hints": [
+    "¿Qué ocurre cuando accedes a tu perfil?",
+    "¿Cómo se carga tu foto de perfil?",
+    "¿Puedes modificar la ruta para cargar otra imagen?",
+    "¿Qué pasa si interceptas la solicitud e intentas cargar un archivo de credenciales?",
+    "¿Qué te devuelve la solicitud cuando usas la clave 'credentials.txt'?",
+    "¿Puedes usar las credenciales para acceder a la cuenta de administrador?",
+    "¿Puedes eliminar la cuenta de Steve?"
+  ]
+}

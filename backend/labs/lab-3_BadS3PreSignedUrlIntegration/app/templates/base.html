@@ -1,0 +1,64 @@
+<!-- base.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Sneaker Store</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/global.css') }}">
+    {% block styles %}{% endblock %}
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo">SneakerHub</a>
+
+            <!-- Menú de la derecha (login o links de cuenta) -->
+            <div class="nav-right">
+                {% if current_user.is_authenticated %}
+                <!-- Nuevos botones con misma clase que 'login-link' para conservar estilo -->
+                <a href="{{ url_for('cart') }}" class="login-link">
+                    <!-- Aquí un ícono como texto o imagen:
+                             <img src="{{ url_for('static', filename='images/cart.png') }}" alt="Cart" width="20" height="20">
+                        -->
+                    Cart
+                </a>
+                {% if current_user.admin %}
+                <a href="{{ url_for('admin_panel') }}" class="login-link">Admin Panel</a>
+                {% endif %}
+                <a href="{{ url_for('account') }}" class="login-link">My Account</a>
+                <a href="{{ url_for('logout') }}" class="login-link">Logout</a>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="login-link">Iniciar sesión</a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+    {% if session.get('lab_solved') %}
+    <div id="lab-solved-banner" class="lab-solved-banner">
+        ✅ Congratulations, you solved the lab!
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Cuando el DOM está listo, añadimos la clase que hace la animación
+            const banner = document.getElementById("lab-solved-banner");
+            banner.classList.add("slide-in");
+            // Tras animar, limpiar la sesión en el backend:
+            fetch("{{ url_for('clear_lab_solved') }}", { method: "POST" })
+                .catch(err => console.error(err));
+        });
+    </script>
+    {% endif %}
+
+    <main class="main-content-container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2025 SneakerHub. All rights reserved.</p>
+    </footer>
+</body>
+
+</html>

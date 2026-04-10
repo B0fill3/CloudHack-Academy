@@ -1,0 +1,72 @@
+services:
+
+  aws-s3-emu:
+    image: python:3.9-slim
+    container_name: aws-s3-emu
+    volumes:
+      - .:/app
+    working_dir: /app
+    expose:
+      - "4566"
+    networks:
+      app_net:
+        ipv4_address: 172.28.0.2
+    ports:
+      - "4566:4566"
+    command: >
+      sh -c "pip install flask && python aws-s3-emu.py"      
+    labels:
+      lab: "true"
+      lab_id: 2
+
+  metadata_server:
+    image: python:3.9-slim
+    container_name: metadata_server
+    # Montar el proyecto en /app para acceder al metadata-server.py
+    volumes:
+      - .:/app
+    working_dir: /app
+    # Ejecuta Flask en el puerto 80, sin mapearlo a host
+    command: >
+      sh -c "pip install flask && python metadata-server.py"
+    expose:
+      - "80"
+    networks:
+      app_net:
+        ipv4_address: 172.28.0.4
+    labels:
+      lab: "true"
+      lab_id: 2
+  
+  flask_app:
+    build: .
+    container_name: flask_app
+    privileged: true     
+    depends_on:
+      - aws-s3-emu
+      - metadata_server
+    ports:
+      - "5001:5001"
+    # Redirige la IP de metadatos al contenedor de LocalStack
+    extra_hosts:
+      - "169.254.169.254:172.28.0.4"
+    networks:
+      app_net:
+        ipv4_address: 172.28.0.3
+    command: >
+      sh -c "
+      iptables -t nat -A OUTPUT -p tcp -d 169.254.169.254 -j DNAT --to-destination 172.28.0.4:80 &&
+      python -m app.db_init &&
+      python run.py --host=0.0.0.0 --port=5001
+      "
+    labels:
+      lab: "true"
+      lab_id: 2
+
+
+networks:
+  app_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16

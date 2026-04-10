@@ -1,0 +1,26 @@
+services:
+
+  aws-s3-emu:
+    image: python:3.9-slim
+    container_name: Lab-Public-S3-Bucket-S3Emu
+    volumes:
+      - .:/app
+    working_dir: /app
+    ports:
+      - "4566:4566"
+    command: >
+      sh -c "pip install flask && python aws-s3-emu.py"
+    labels:
+      lab: "true"
+      lab_id: 1
+
+  flask_app:
+    build: .
+    container_name: Lab-Public-S3-Bucket
+    depends_on:
+      - aws-s3-emu
+    ports:
+      - "5001:5001"
+    labels:
+      lab: "true"
+      lab_id: 1

@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: User Pool para laboratorio vulnerable con registro desde CLI
+
+Resources:
+
+
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: LabUserPool
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+      VerificationMessageTemplate:
+        EmailSubject: "Verify your account on Lab"
+        EmailMessage: "Your verification code is {####}"
+        DefaultEmailOption: CONFIRM_WITH_CODE
+      Schema:
+        - Name: email
+          Required: true
+          Mutable: true
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 6
+          RequireUppercase: false
+          RequireLowercase: false
+          RequireNumbers: false
+          RequireSymbols: false
+
+
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: LabWebClient
+      UserPoolId: !Ref CognitoUserPool
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_SRP_AUTH
+      AllowedOAuthFlowsUserPoolClient: false
+
+Outputs:
+  UserPoolId:
+    Description: ID del User Pool
+    Value: !Ref CognitoUserPool
+
+  UserPoolClientId:
+    Description: Client ID del User Pool Client (expuesto en el frontend)
+    Value: !Ref CognitoUserPoolClient

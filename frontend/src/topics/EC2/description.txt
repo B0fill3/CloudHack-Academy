@@ -1,0 +1,1 @@
+Servicio de computación en la nube que proporciona instancias virtuales escalables. El acceso a metadatos desde dentro de una instancia o una mala configuración en los roles asignados puede permitir la obtención de credenciales temporales y el acceso no autorizado a otros servicios.

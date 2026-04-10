@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/account.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div class="account-container">
+        <h1 class="account-title">My Account</h1>
+
+        <!-- Imagen de perfil -->
+        <div class="profile-image">
+            <img src="/get-image?key={{ user.image }}" alt="Profile Image" width="150" height="150">
+        </div>
+
+        <!-- Formulario para cambiar la imagen -->
+        <form action="{{ url_for('change_profile_image') }}" method="POST" enctype="multipart/form-data" class="upload-form">
+            <label for="image">Change Profile Picture:</label>
+            <input type="file" name="image" id="image" accept="image/*" required>
+            <button type="submit">Upload</button>
+        </form>
+
+        <div class="account-info">
+            <div class="info-item">
+                <div class="info-label">Username</div>
+                <div class="info-value">{{ user.username }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Email</div>
+                <div class="info-value">{{ user.email }}</div>
+            </div>
+        </div>
+
+        <!-- Botón de regreso a la tienda -->
+        <a href="{{ url_for('index') }}" class="back-to-store">Back to Store</a>
+    </div>
+{% endblock %}

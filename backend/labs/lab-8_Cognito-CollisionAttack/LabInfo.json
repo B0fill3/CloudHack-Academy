@@ -1,0 +1,13 @@
+{
+  "id": 8,
+  "topic": "Amazon Cognito",
+  "credentialsNeeded": true,
+  "title": "Ataque de colisión a Amazon Cognito",
+  "description": "En alguna parte de este laboratorio podrás encontrar datos expuestos de Amazon Cognito que un desarrollador ha olvidado borrar. Escala tus privilegios usando técnicas vistas en la sección teórica y elimina la cuenta de Steve.",
+  "difficulty": "intermediate",
+  "recommendedReadings": ["Introducción","1_User Pools", "2_Malas prácticas con User Pools"],
+  "hints": [
+    "Can you inject something into a field used for invoice generation?"
+  ],
+  "note": "Este laboratorio puede tardar un tiempo extra en desplegarse, ya que tiene que crear todos los recursos necesarios en AWS. En este laboratorio no deberías intentar acceder a ningún servicio de AWS a tráves de tu cuenta de usuario. En su lugar, deberías buscar credenciales de acceso a AWS que un desarrollador ha olvidado borrar. Estas credenciales pueden estar en cualquier parte del laboratorio, así que asegúrate de revisar todos los archivos y configuraciones disponibles. Una vez que encuentres las credenciales, podrás utilizarlas para escalar tus privilegios y eliminar la cuenta de Steve."
+}

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/cart.css') }}">
+{% endblock %}
+
+{% block content %}
+<div>
+    <h1 class="cart-title">Shopping Cart</h1>
+    
+    <div class="cart-container">
+        <!-- Si el carrito está vacío, mostramos un mensaje -->
+        {% if cart_items|length == 0 %}
+            <div class="cart-empty">Your cart is empty</div>
+        {% else %}
+            <div class="cart-items">
+                {% for item in cart_items %}
+                <div class="cart-item">
+                    <div class="cart-item-image">
+                        <!-- Muestra la imagen de la BD, o usa placeholder si no existe -->
+                        <img src="{{ item.sneaker.image }}"
+                             alt="{{ item.sneaker.name }}">
+                    </div>
+                    
+                    <div class="cart-item-details">
+                        <h3>{{ item.sneaker.name }}</h3>
+                        <p class="cart-item-price">${{ item.sneaker.price }}</p>
+                        <!-- Si guardas 'size' en la tabla 'Cart', muéstralo:
+                             <p>Size: {{ item.size }}</p> -->
+                    </div>
+
+                    <div class="cart-item-quantity">
+                        
+                        <form action="/remove_one/{{ item.sneaker.id }}" method="POST">
+                            <button class="quantity-btn">-</button>
+                        </form>
+
+                        <input type="text" class="quantity-input" 
+                               value="{{ item.quantity }}" min="1" max="10">
+                        <form action="/add_to_cart/{{ item.sneaker.id }}" method="POST">
+                            <button class="quantity-btn">+</button>
+                        </form>
+
+                    </div>
+                    
+                    <div class="cart-item-actions">
+                        <form action="/remove_all/{{ item.sneaker.id }}" method="POST">
+                            <button class="remove-btn" data-item-id="{{ item.sneaker.id }}">Remove</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Resumen del carrito -->
+            <div class="cart-summary">
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span>${{ total|round(2) }}</span>
+                </div>
+            </div>
+
+            <button class="checkout-btn">Checkout</button>
+        {% endif %}
+        
+        <!-- Enlace para seguir comprando -->
+        <a href="{{ url_for('index') }}" class="continue-shopping">Continue Shopping</a>
+    </div>
+</div>
+
+<!-- Scripts de cantidad y remover (frontend demo). 
+     En un proyecto real, tendrías rutas POST para actualizar la DB. -->
+<script>
+
+
+    // Manejo del botón "Remove"
+    document.querySelectorAll('.remove-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const cartItem = this.closest('.cart-item');
+            const itemId = this.getAttribute('data-item-id');
+            
+            // Podrías hacer un fetch/axios POST para borrar el item en el servidor:
+            // fetch(`/remove_from_cart/${itemId}`, { method: 'POST' })
+            //   .then(res => { ...actualizar la vista... })
+
+            // Para demo, lo removemos de la vista:
+            cartItem.style.opacity = '0';
+            setTimeout(() => {
+                cartItem.remove();
+
+                // Si no quedan items, mostramos mensaje de carrito vacío y ocultamos resumen
+                if (!document.querySelectorAll('.cart-item').length) {
+                    document.querySelector('.cart-items').innerHTML = '<div class="cart-empty">Your cart is empty</div>';
+                    document.querySelector('.cart-summary').style.display = 'none';
+                    document.querySelector('.checkout-btn').style.display = 'none';
+                }
+            }, 300);
+            cartItem.style.transition = 'opacity 0.3s';
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/account.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div class="account-container">
+        <h1 class="account-title">My Account</h1>
+        <div class="account-info">
+            <div class="info-item">
+                <div class="info-label">Username</div>
+                <div class="info-value">{{ user.username }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Email</div>
+                <div class="info-value">{{ user.email }}</div>
+            </div>
+        </div>
+        <!-- Botón de regreso a la tienda -->
+        <a href="{{ url_for('index') }}" class="back-to-store">Back to Store</a>
+    </div>
+{% endblock %}

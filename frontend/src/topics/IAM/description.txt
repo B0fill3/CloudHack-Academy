@@ -1,0 +1,1 @@
+Servicio que gestiona identidades y permisos en AWS. Una configuración permisiva en roles o políticas puede permitir la asunción de identidades privilegiadas, el acceso a recursos restringidos o la escalada de privilegios dentro del entorno.

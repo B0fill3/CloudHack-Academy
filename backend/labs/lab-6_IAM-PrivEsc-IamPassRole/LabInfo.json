@@ -1,0 +1,38 @@
+{
+  "id": 6,
+  "topic": "IAM",
+  "credentialsNeeded": true,
+  "title": "Escalada de Privilegios a través del permiso de 'iam:PassRole'",
+  "description": "En alguna parte de este laboratorio podrás encontrar unas credenciales de acceso a AWS que un desarrollador ha olvidado borrar. Escala tus privilegios a través de estas credenciales y elimina la cuenta de Steve. En este laboratorio no deberías intentar acceder a ningún servicio de AWS a tráves de tu cuenta de usuario. En su lugar, deberías buscar credenciales de acceso a AWS que un desarrollador ha olvidado borrar. Estas credenciales pueden estar en cualquier parte del laboratorio, así que asegúrate de revisar todos los archivos y configuraciones disponibles. Una vez encuentres las credenciales, podrás utilizarlas para escalar tus privilegios y eliminar la cuenta de Steve.",
+  "difficulty": "advanced",
+  "recommendedReadings": [
+    "Introduction",
+    "1_Fundamentos de IAM",
+    "2_Entidades de IAM",
+    "3_Políticas de IAM",
+    "5_Enumeración de Permisos",
+    "6_Escalada de Privilegios"
+  ],
+  "hints": [
+    "¿Has revisado el código fuente de la página principal? A veces los desarrolladores dejan más de lo que deberían.",
+    "Busca referencias a archivos estáticos que puedan contener información sensible.",
+    "¿Te suena un archivo llamado aws-credentials.json? Puede que no esté ahí por casualidad.",
+    "Prueba a configurar un perfil de AWS CLI con esas credenciales. ¿Te permite ejecutar algo como 'sts get-caller-identity'?",
+    "Recuerda que una cuenta con acceso programático no siempre puede acceder a la consola web.",
+    "Una vez autenticado, enumera tus permisos. ¿Puedes ver roles, políticas o grupos a los que perteneces?",
+    "¿A qué grupo pertenece el usuario? ¿Qué políticas tiene ese grupo?",
+    "Busca acciones relacionadas con EC2 y IAM, especialmente 'PassRole'.",
+    "¿Puedes lanzar una instancia EC2? ¿Puedes asociarle algún rol?",
+    "¿Qué hace falta antes de poder asociar un rol a una instancia?",
+    "Recuerda crear un instance profile y asociarlo al rol que quieres usar.",
+    "¿Has revisado qué roles existen en la cuenta? Alguno podría tener permisos interesantes.",
+    "Uno de los roles parece tener permisos administrativos. ¿Puedes lanzarlo en una instancia?",
+    "Accede a la instancia por SSH. ¿Qué puedes encontrar en el endpoint de metadatos?",
+    "Explora http://169.254.169.254/latest/meta-data/iam/security-credentials/",
+    "Extrae las credenciales temporales y utilízalas localmente con variables de entorno.",
+    "¿Puedes listar buckets de S3 ahora? Quizá haya algo útil almacenado.",
+    "Explora el contenido del bucket. ¿Hay algún archivo que pueda contener credenciales o contraseñas?",
+    "Recuerda eliminar todos los recursos que has creado cuando termines el laboratorio."
+  ],
+  "note": "Este laboratorio puede tardar un tiempo extra en desplegarse, ya que tiene que crear todos los recursos necesarios en AWS. Es muy importante que al finalizar el laboratorio elimines todos los recursos creados por ti de manera manual para resolver el laboratorio, ya que de lo contrario el borrado automatizado del laboratorio no funcionará correctamente."
+}

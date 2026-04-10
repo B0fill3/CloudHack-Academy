@@ -1,0 +1,37 @@
+{
+  "id": 4,
+  "topic": "IAM",
+  "credentialsNeeded": true,
+  "title": "Escalada de Privilegios mediante el permiso CreateAccessKey",
+  "description": "En alguna parte de este laboratorio podrás encontrar unas credenciales de acceso a AWS que un desarrollador ha olvidado borrar. Escala tus privilegios a través de estas credenciales y elimina la cuenta de Steve.",
+  "difficulty": "intermediate",
+  "recommendedReadings": [
+    "Introduction",
+    "1_Fundamentos de IAM",
+    "2_Entidades de IAM",
+    "3_Políticas de IAM",
+    "5_Enumeración de Permisos",
+    "6_Escalada de Privilegios"
+  ],
+  "hints": [
+    "¿Has inspeccionado el código fuente de la página principal de la tienda?",
+    "¿Puedes identificar alguna referencia a un archivo que pueda contener credenciales?",
+    "¿Puedes acceder al fichero 'aws-credentials.json' y revisar su contenido?",
+    "¿Has probado a configurar la CLI de AWS con las credenciales encontradas?",
+    "¿Puedes verificar si las credenciales son válidas usando 'aws sts get-caller-identity'?",
+    "¿Qué sucede si intentas listar los permisos del usuario con 'list-attached-user-policies'?",
+    "¿Has considerado que el usuario podría heredar permisos de un grupo?",
+    "¿Puedes listar los grupos del usuario con 'aws iam list-groups-for-user'?",
+    "¿Puedes identificar si hay políticas asociadas al grupo 'devs'?",
+    "¿La política del grupo permite ejecutar 'iam:CreateAccessKey'? ¿Sobre qué recursos?",
+    "¿Puedes encontrar otro usuario que pertenezca al grupo y tenga un nombre que sugiera mayores privilegios?",
+    "¿Puedes crear una clave de acceso para ese usuario con privilegios elevados?",
+    "¿Has probado a configurar la CLI con las nuevas credenciales generadas?",
+    "¿Puedes ahora acceder a servicios críticos como S3 usando 'aws s3 ls'?",
+    "¿Hay algún bucket visible? ¿Contiene ficheros con nombres sugerentes como 'credentials.txt'?",
+    "¿Puedes descargar y leer el archivo 'credentials.txt'? ¿Qué contiene?",
+    "¿Puedes iniciar sesión en la tienda con las nuevas credenciales del usuario administrador?",
+    "¿Puedes acceder al panel de administración y eliminar al usuario 'steve' para completar el laboratorio?"
+  ],
+  "note": "Este laboratorio puede tardar un tiempo extra en desplegarse, ya que tiene que crear todos los recursos necesarios en AWS. En este laboratorio no deberías intentar acceder a ningún servicio de AWS a tráves de tu cuenta de usuario. En su lugar, deberías buscar credenciales de acceso a AWS que un desarrollador ha olvidado borrar. Estas credenciales pueden estar en cualquier parte del laboratorio, así que asegúrate de revisar todos los archivos y configuraciones disponibles. Una vez encuentres las credenciales, podrás utilizarlas para escalar tus privilegios y eliminar la cuenta de Steve."
+}

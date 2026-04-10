@@ -1,0 +1,15 @@
+version: '3'
+services:
+  flask_app:
+    build: .
+    ports:
+      - "5001:5001"
+    volumes:
+      - .:/app
+    labels:
+      lab: "true"
+      lab_id: 9
+    environment:
+      - CLOUD_LAB_ACCESS_KEY=${CLOUD_LAB_ACCESS_KEY}
+      - CLOUD_LAB_SECRET=${CLOUD_LAB_SECRET}
+      - CLOUD_LAB_REGION=${CLOUD_LAB_REGION}

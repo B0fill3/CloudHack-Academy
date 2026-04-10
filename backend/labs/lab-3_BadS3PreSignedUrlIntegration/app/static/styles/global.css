@@ -1,0 +1,101 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #e0e0e0; /* Cambiado a un gris claro */
+}
+
+header {
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+    text-decoration: none;
+}
+
+.login-link {
+    color: #ff6600; /* Cambiado a naranja */
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+    margin-inline: 1rem;
+}
+
+.login-link:hover {
+    color: #ff8533; /* Naranja más claro al pasar el mouse */
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+
+footer {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 1rem;
+    margin-top: 2rem;
+}
+
+footer p {
+    color: #ff6600; /* Texto del footer en naranja */
+}
+
+.main-content-container{
+    min-height: 85vh;
+}
+
+/* 
+   Base styles for the banner 
+   Por defecto, está fuera de pantalla (top -100% con transform).
+*/
+.lab-solved-banner {
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #ff6600; /* mismo naranja usado en tu sitio */
+    color: #fff;
+    text-align: center;
+    padding: 1rem;
+    font-weight: bold;
+    font-size: 1.1rem;
+    z-index: 9999;
+    transform: translateY(-100%); 
+    transition: transform 0.5s ease-out;
+  }
+  
+  /* Al añadir la clase .slide-in, el banner se desliza hacia abajo */
+  .lab-solved-banner.slide-in {
+    transform: translateY(0);
+  }
+  
+  /* 
+     Opcional: si quisieras un efecto de subir 
+     al quitar el banner, define .slide-out 
+     y añádesela por JS:
+  */
+  /*
+  .lab-solved-banner.slide-out {
+    transform: translateY(-100%);
+  }
+  */
+  

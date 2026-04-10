@@ -1,0 +1,25 @@
+    {
+      "id": 2,
+      "topic": "EC2",
+      "credentialsNeeded": false,
+      "title": "Exfiltración de credenciales desde EC2 mediante SSRF al servicio de metadatos",
+      "description": "In this lab, you will explore the security risks of an SSRF vulnerability on an EC2 instance with IMDSv1. The target server has a vulnerable script that allows you to make HTTP requests to any URL. Your objective is to exploit this vulnerability to access the metadata service and retrieve the IAM credentials of the role assigned to the EC2 instance. After that you will need to list the S3 buckets using these credentials and retrieve the admin credentials to delete Steve's account.",
+      "difficulty": "intermediate",
+      "recommendedReadings": ["Introducción" , "1_Servicio de Metadatos"],
+      "hints": [
+        "¿Puedes inyectar algo en un campo que se utiliza para generar la factura?",
+        "¿Puedes manipular el contenido de la factura para cargar recursos externos?",
+        "¿Puedes inyectar un iframe en la factura para desencadenar una petición externa?",
+        "¿Puedes forzar al generador de facturas a realizar una petición interna al servidor de metadatos?",
+        "¿Qué ocurre si intentas acceder a http://169.254.169.254/latest/meta-data/ usando SSRF?",
+        "¿Puedes obtener credenciales temporales de IAM desde el servidor de metadatos?",
+        "¿Puedes listar los buckets de S3 disponibles?",
+        "¿Hay algún archivo almacenado en un bucket de S3 que contenga información útil?",
+        "¿Puedes descargar un archivo del bucket de S3?",
+        "¿Contiene el archivo descargado credenciales?",
+        "¿Puedes usar las credenciales para acceder al panel de administración?",
+        "¿Puedes encontrar y eliminar la cuenta de Steve?"
+      ]
+,
+      "note": "Este laboratorio utiliza una <strong>implementación personalizada de un endpoint de AWS</strong>. Solo puedes utilizar el <strong>servicio S3</strong> a través de la CLI, estando disponibles únicamente los comandos \"ls\" y \"cp\". A pesar de esta implementación, debes usar <strong>http://169.254.169.254</strong> para acceder al servidor de metadatos, tal como lo harías en un escenario real."
+    }
